@@ -84,9 +84,8 @@ public class Calculator {
                 
             case "alphabetize":
                 System.out.println("Enter two words:");
-                String word1 = scan.next();
-                String word2 = scan.next();
-                
+                String word1 = scan.next().toLowerCase();
+                String word2 = scan.next().toLowerCase();
                 // Use compareTo to determine lexicographic ordering
                 int comparison = word1.compareTo(word2);
                 if (comparison == 0) {
