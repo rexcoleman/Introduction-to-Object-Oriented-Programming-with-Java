@@ -84,10 +84,11 @@ public class Calculator {
                 
             case "alphabetize":
                 System.out.println("Enter two words:");
-                String word1 = scan.next().toLowerCase();
-                String word2 = scan.next().toLowerCase();
+                String word1 = scan.next();
+                String word2 = scan.next();
+                
                 // Use compareTo to determine lexicographic ordering
-                int comparison = word1.compareTo(word2);
+                int comparison = word1.toLowerCase().compareTo(word2.toLowerCase());
                 if (comparison == 0) {
                     System.out.println("Answer: Chicken or Egg.");
                 } else if (comparison < 0) {
