@@ -1,8 +1,10 @@
 public class Test {
     public static void main(String[] args) {
-        for (int i = 50; i > 0; i -= 10) {
-            System.out.print(i);
-         }
+        String[] trial = new String[3];
+        for (String places: trial) {
+          System.out.println(places + " ");
+        }
     }
 }
+
 
