@@ -1,164 +1,161 @@
 import java.util.Scanner;
 
 public class Battleship {
+    // Helper class to handle turn results more precisely
+    private static class TurnResult {
+        boolean isWin;
+        char[][] finalBoard;
+        
+        TurnResult(boolean isWin, char[][] finalBoard) {
+            this.isWin = isWin;
+            this.finalBoard = finalBoard;
+        }
+    }
+    
     public static void main(String[] args) {
-        // Initialize scanner for user input
         Scanner scanner = new Scanner(System.in);
         
-        // Welcome message
-        System.out.println("Welcome to Battleship!");
-        
-        // Initialize game boards
-        // Location boards track ship positions and hits/misses
-        char[][] player1LocationBoard = new char[5][5];
-        char[][] player2LocationBoard = new char[5][5];
-        // Target history boards track each player's shots
-        char[][] player1TargetHistory = new char[5][5];
-        char[][] player2TargetHistory = new char[5][5];
+        // Initialize game boards for both players
+        char[][] player1Board = new char[5][5];
+        char[][] player2Board = new char[5][5];
+        char[][] player1Shots = new char[5][5];
+        char[][] player2Shots = new char[5][5];
         
         // Initialize all boards with empty spaces
-        initializeBoard(player1LocationBoard);
-        initializeBoard(player2LocationBoard);
-        initializeBoard(player1TargetHistory);
-        initializeBoard(player2TargetHistory);
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 5; j++) {
+                player1Board[i][j] = '-';
+                player2Board[i][j] = '-';
+                player1Shots[i][j] = '-';
+                player2Shots[i][j] = '-';
+            }
+        }
         
-        // Get ship placements for both players
-        System.out.println("\nPLAYER 1, ENTER YOUR SHIPS' COORDINATES.");
-        placeShips(scanner, player1LocationBoard, 1);
+        // Print welcome message
+        System.out.println("Welcome to Battleship!");
+        System.out.println();
         
-        // Print 100 blank lines to hide Player 1's ship locations
+        // Player 1 ship placement
+        System.out.println("PLAYER 1, ENTER YOUR SHIPS' COORDINATES.");
+        placeShips(scanner, player1Board);
+        
+        // Clear screen with 100 lines
         for (int i = 0; i < 100; i++) {
             System.out.println();
         }
         
+        // Player 2 ship placement
         System.out.println("PLAYER 2, ENTER YOUR SHIPS' COORDINATES.");
-        placeShips(scanner, player2LocationBoard, 2);
+        placeShips(scanner, player2Board);
+        
+        // Clear screen with 100 lines
+        for (int i = 0; i < 100; i++) {
+            System.out.println();
+        }
         
         // Main game loop
         boolean gameOver = false;
         do {
             // Player 1's turn
-            gameOver = playerTurn(scanner, 1, player2LocationBoard, player1TargetHistory);
-            if (gameOver) {
-                System.out.println("PLAYER 1 WINS! YOU SUNK ALL OF YOUR OPPONENT'S SHIPS!");
+            TurnResult p1Result = playerTurn(scanner, 1, player2Board, player1Shots);
+            if (p1Result.isWin) {
+                System.out.println("PLAYER 1 WINS! YOU SUNK ALL OF YOUR OPPONENT'S SHIPS!\n");
+                System.out.println("Final boards:\n");
+                printBattleShip(player1Board);
+                System.out.println();
+                printBattleShip(player2Board);
+                gameOver = true;
                 break;
             }
             
             // Player 2's turn
-            gameOver = playerTurn(scanner, 2, player1LocationBoard, player2TargetHistory);
-            if (gameOver) {
-                System.out.println("PLAYER 2 WINS! YOU SUNK ALL OF YOUR OPPONENT'S SHIPS!");
+            TurnResult p2Result = playerTurn(scanner, 2, player1Board, player2Shots);
+            if (p2Result.isWin) {
+                System.out.println("PLAYER 2 WINS! YOU SUNK ALL OF YOUR OPPONENT'S SHIPS!\n");
+                System.out.println("Final boards:\n");
+                printBattleShip(player1Board);
+                System.out.println();
+                printBattleShip(player2Board);
+                gameOver = true;
                 break;
             }
         } while (!gameOver);
-        
-        // Print final boards
-        System.out.println("\nFinal boards:\n");
-        printBattleShip(player1LocationBoard);
-        System.out.println();
-        printBattleShip(player2LocationBoard);
-        
-        scanner.close();
     }
     
-    // Initialize board with empty spaces
-    private static void initializeBoard(char[][] board) {
-        for (int i = 0; i < 5; i++) {
-            for (int j = 0; j < 5; j++) {
-                board[i][j] = '-';
-            }
-        }
-    }
-    
-    // Handle ship placement for a player
-    private static void placeShips(Scanner scanner, char[][] board, int playerNum) {
+    private static void placeShips(Scanner scanner, char[][] board) {
         for (int i = 1; i <= 5; i++) {
-            boolean validPlacement = false;
-            do {
+            while (true) {
                 System.out.println("Enter ship " + i + " location:");
                 int row = scanner.nextInt();
                 int col = scanner.nextInt();
                 
-                // Validate coordinates
                 if (row < 0 || row >= 5 || col < 0 || col >= 5) {
                     System.out.println("Invalid coordinates. Choose different coordinates.");
                     continue;
                 }
                 
-                // Check if space is already occupied
                 if (board[row][col] == '@') {
                     System.out.println("You already have a ship there. Choose different coordinates.");
                     continue;
                 }
                 
-                // Place ship
                 board[row][col] = '@';
-                validPlacement = true;
-            } while (!validPlacement);
+                break;
+            }
         }
-        
-        // Print the board after all ships are placed
         printBattleShip(board);
     }
     
-    // Handle a player's turn
-    private static boolean playerTurn(Scanner scanner, int playerNum, char[][] opponentBoard, char[][] targetHistory) {
-        boolean validShot = false;
-        do {
+    private static TurnResult playerTurn(Scanner scanner, int playerNum, char[][] opponentBoard, char[][] shotBoard) {
+        while (true) {
             System.out.println("Player " + playerNum + ", enter hit row/column:");
             int row = scanner.nextInt();
             int col = scanner.nextInt();
             
-            // Validate coordinates
             if (row < 0 || row >= 5 || col < 0 || col >= 5) {
                 System.out.println("Invalid coordinates. Choose different coordinates.");
                 continue;
             }
             
-            // Check if already fired at these coordinates
-            if (targetHistory[row][col] != '-') {
+            if (shotBoard[row][col] != '-') {
                 System.out.println("You already fired on this spot. Choose different coordinates.");
                 continue;
             }
             
-            // Process the shot
-            if (opponentBoard[row][col] == '@') {
-                // Hit
+            if (opponentBoard[row][col] == '@' || opponentBoard[row][col] == 'X') {
                 opponentBoard[row][col] = 'X';
-                targetHistory[row][col] = 'X';
+                shotBoard[row][col] = 'X';
                 System.out.println("PLAYER " + playerNum + " HIT PLAYER " + 
                     (playerNum == 1 ? "2" : "1") + "'s SHIP!");
             } else {
-                // Miss
                 opponentBoard[row][col] = 'O';
-                targetHistory[row][col] = 'O';
+                shotBoard[row][col] = 'O';
                 System.out.println("PLAYER " + playerNum + " MISSED!");
             }
             
-            // Print updated target history
-            printBattleShip(targetHistory);
-            validShot = true;
+            printBattleShip(shotBoard);
             
-            // Check if all ships are sunk
-            return checkWin(opponentBoard);
-        } while (!validShot);
-        
-        return false;
-    }
-    
-    // Check if all ships have been sunk
-    private static boolean checkWin(char[][] board) {
-        for (int i = 0; i < 5; i++) {
-            for (int j = 0; j < 5; j++) {
-                if (board[i][j] == '@') {
-                    return false;
+            // Check for win condition
+            boolean isWin = true;
+            for (int i = 0; i < 5; i++) {
+                for (int j = 0; j < 5; j++) {
+                    if (opponentBoard[i][j] == '@') {
+                        isWin = false;
+                        break;
+                    }
                 }
+                if (!isWin) break;
             }
+            
+            // Only print newline if not a winning move
+            if (!isWin) {
+                System.out.println();
+            }
+            
+            return new TurnResult(isWin, shotBoard);
         }
-        return true;
     }
     
-    // Use this method to print game boards to the console.
     private static void printBattleShip(char[][] player) {
         System.out.print("  ");
         for (int row = -1; row < 5; row++) {
