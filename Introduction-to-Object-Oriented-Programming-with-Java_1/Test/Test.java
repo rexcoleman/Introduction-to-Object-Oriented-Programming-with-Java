@@ -1,9 +1,7 @@
 public class Test {
-    public static void main(String[] args) {
-        String[] trial = new String[3];
-        for (String places: trial) {
-          System.out.println(places + " ");
-        }
+    public static void main(String []args){
+        System.out.println("X");
+        //System.out.println("Y");
     }
 }
 
