@@ -10,6 +10,7 @@ public class GroomEverything {
 
         for (Groomable c : groomer) { // groom everything
             c.groom();
+            c.pay();
         }
     }
 }
